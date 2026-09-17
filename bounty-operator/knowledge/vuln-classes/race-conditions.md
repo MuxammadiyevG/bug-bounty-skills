@@ -40,7 +40,13 @@ A **quantified overrun**: the action succeeded more times than allowed and the *
 Race → double-spend → direct financial. Race a coupon/referral → free credit → real loss. Race seat/role grants → priv-esc. Race + logic flaw compounds the multiplier. See `../../references/chaining.md`.
 
 ## Real paid example
-Gift-card redemption checked balance then debited in a separate statement. 20 parallel single-packet redeems of a $50 card credited the wallet ~$950 before the balance zeroed. Reproduced to 2× first, then quantified. Band: **$2k–$8k** (direct financial, clean repro).
+Real disclosed reports:
+- **Race Condition Enables Bypassing Verification Check** (Tools for Humanity, $3,000) — hackerone.com/reports/2110030 — concurrent requests slipped through a one-time verification gate before it committed.
+- **Race condition in activating email resulting in infinite amount of diamonds received** (InnoGames, $2,000) — hackerone.com/reports/509629 — racing the email-activation grant credited the currency reward many times over.
+- **Race Condition allows to redeem multiple times gift cards which leads to free "money"** (Reverb.com, bounty undisclosed) — hackerone.com/reports/759247 — check-balance-then-debit wasn't atomic, so parallel redeems of one card credited the wallet multiple times.
+- **Race condition in performing retest allows duplicated payments** (HackerOne, bounty undisclosed) — hackerone.com/reports/429026 — a retest action assumed single execution and paid out twice under concurrency.
+
+**The recurring tell:** a "happens once" guard (redeem once, activate once, verify once, pay once) sits on a non-atomic check-then-act, and firing N requests into the check-to-commit window makes the limit hold zero times.
 
 ## Rejected variants
 - Two concurrent 200s where the final state is still correct (server serialized properly).

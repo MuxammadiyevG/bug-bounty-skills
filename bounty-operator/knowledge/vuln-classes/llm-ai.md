@@ -66,10 +66,12 @@ metadata) or **RCE** (code tool). Memory poisoning → persistent cross-session 
 `../../references/chaining.md`.
 
 ## Real paid example
-A support copilot let users query order status through a backend tool. Asking it for order
-`#100438` (not the user's) returned another customer's name, address, and order contents because the
-tool fetched by id without scoping to the session identity. Chatbot IDOR (ASI03) proven with one
-other-tenant record, then stopped. Rough band: $3k–$12k.
+Real disclosed reports (this surface is new — public H1 disclosures are still thin, and most verified cases live on huntr, the AI/ML bounty platform):
+- **LLM01: Invisible Prompt Injection** (HackerOne, $2,500) — hackerone.com/reports/2372363 — zero-width Unicode tag characters hidden in a report template smuggled instructions into "Hai", HackerOne's GenAI assistant (found by @H4cktus and @rez0__).
+- **Source Code and data exfiltration** (GitHub, bounty undisclosed) — hackerone.com/reports/2383092 — prompt injection from an untrusted repo made Copilot Chat render attacker-controlled image links that beaconed out private data ("CamoLeak", CVE-2025-59145).
+- **Remote code execution caused by prompt injection in Vanna.AI** (huntr, bounty undisclosed) — huntr.com/bounties/90620087-44ac-4e43-b659-3c5d30889369 — injected text steered the LLM's generated Python into RCE (CVE-2024-5565 / CVE-2024-5826).
+
+**The recurring tell:** payment follows a crossed boundary, not rude output — an injection (often invisible/indirect) reaches a tool with more authority than the user: a data-exfil render channel, a code-execution tool, or another user's records. Jailbreak-only text is not paid.
 
 ## Rejected variants
 - A jailbreak producing disallowed text with no data access, no action, no exfil — content policy, not

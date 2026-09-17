@@ -50,9 +50,13 @@ LFI → source disclosure → find hardcoded secrets/second bug. LFI → RCE = c
 metadata/env creds → infra. See `../../references/chaining.md`.
 
 ## Real paid example
-A CMS `?tpl=` param fed `include`. `php://filter/convert.base64-encode/resource=config.php` leaked a
-DB password and an API key; the iconv filter-chain technique then executed `phpinfo()` from the same
-param with no writable directory. Read→RCE proven with a benign marker. Rough band: $6k–$20k.
+Real disclosed reports:
+- **Path traversal, to RCE** (GitLab, $12000) — hackerone.com/reports/733072 — file-path traversal escalated into code execution.
+- **Path traversal, SSTI and RCE on a MailRu acquisition** (Mail.ru, $2000) — hackerone.com/reports/536130 — traversal chained with template injection into RCE.
+- **Worker container escape lead to arbitrary file reading in host machine [again]** (Semmle, $2000) — hackerone.com/reports/697055 — arbitrary file read on the host from a worker container.
+- **HTML-injection in PDF-export leads to LFI** (Visma Public, $500) — hackerone.com/reports/809819 — a PDF renderer resolved local file paths from injected HTML.
+
+**The recurring tell:** a param or renderer that maps input to a filesystem path with no canonicalization — traversal first proves the read, then a wrapper/log/template sink turns that read into execution.
 
 ## Rejected variants
 - Traversal returns a 200 but the body is unchanged / no file content — not confirmed LFI.

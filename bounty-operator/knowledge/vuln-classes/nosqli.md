@@ -49,10 +49,11 @@ Auth bypass → land as admin → BFLA on admin functions. Blind read → pull a
 ATO. `$where` JS eval → RCE candidate on the DB host. See `../../references/chaining.md`.
 
 ## Real paid example
-A SaaS login accepted a JSON body. Sending `{"email":"admin@target.tld","password":{"$gt":""}}`
-authenticated as the named admin because the handler passed the object straight to `findOne`. Proven
-by reaching the admin dashboard as a user with no credentials. Auth bypass on the primary product,
-no interaction, pre-auth. Rough band: $4k–$12k.
+Real disclosed reports (closest injection-via-query-operator cases — see tell):
+- **SQL Injection in report_xml.php through countryFilter[] parameter** (Valve, $25,000) — hackerone.com/reports/383127 — bracket/array param (`countryFilter[]`) injected into the query; the same nested-bracket parsing (`param[$ne]=`) is exactly how NoSQL operator injection lands.
+- **SQL injection on contactws.contact-sys.com in TScenObject action ScenObjects leads to remote code execution** (QIWI, bounty undisclosed) — hackerone.com/reports/816254 — injection into query structure escalated to RCE, mirroring the `$where`/`$function` eval-to-RCE path.
+
+**The recurring tell:** NoSQL/MongoDB injection reports do not appear in the reddelexc TOPSQLI top rows — disclosed, paid H1 NoSQLi is genuinely rare and the public tops are all relational SQLi. The cited relational cases are the closest analog: user input reaching the query as *structure* (bracket/array params) rather than a bound value. Treat NoSQLi as high-value-but-thinly-disclosed; lean on the operator-injection mechanics above, not on a rich disclosure trail.
 
 ## Rejected variants
 - Operator reflected but query is parameterized/typed — no behavioral change. Not a bug.

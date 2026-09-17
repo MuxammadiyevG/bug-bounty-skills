@@ -42,7 +42,14 @@ See open-redirect payloads in `../payloads/ssrf.md`/`../bypass-tables.md`.
 Open redirect → OAuth code theft → **ATO**. XSS on callback → token exfil. Subdomain takeover of an allow-listed callback host → code theft. See `../../references/chaining.md`.
 
 ## Real paid example
-`/authorize` prefix-matched `redirect_uri`, so `https://app.target.com.evil.tld/cb` passed validation. A crafted login link sent the victim's `code` to the attacker host; exchange at the token endpoint yielded a full session. 0-click on link visit. Band: **$4k–$12k** (0-click ATO).
+Real disclosed reports:
+- **Ability to DOS any organization's SSO and open up the door to account takeovers** (Superhuman, $10,500) — hackerone.com/reports/976603 — breaking an org's SSO forces fallback auth that enables ATO.
+- **Stealing SSO Login Tokens (snappublisher.snapchat.com)** (Snapchat, $7,500) — hackerone.com/reports/265943 — SSO login token captured cross-origin.
+- **Ability to bypass email verification for OAuth grants results in accounts takeovers on 3rd parties** (GitLab, $3,000) — hackerone.com/reports/922456 — unverified-email account linking pre-hijacks victim SSO.
+- **Stealing Users OAuth authorization code via redirect_uri** (pixiv, $2,000) — hackerone.com/reports/1861974 — loose `redirect_uri` leaks the `code` to an attacker host.
+- **OAuth `redirect_uri` bypass using IDN homograph attack resulting in user's access token leakage** (Semrush, bounty undisclosed) — hackerone.com/reports/861940 — homograph domain passes the callback allowlist.
+
+**The recurring tell:** the AS/RP trusts something it never verified — a loosely matched `redirect_uri`, an unverified email on account link, or an SSO token that leaks cross-origin. The primitive only pays once you drive it to a captured code/token and a real session.
 
 ## Rejected variants
 - Open `redirect_uri` with no code/token actually captured or exchanged.

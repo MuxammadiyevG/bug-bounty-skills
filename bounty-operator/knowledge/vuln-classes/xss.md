@@ -40,7 +40,13 @@ See `../payloads/xss.md`.
 XSS → token theft → ATO. Stored XSS in a shared doc → worm across tenants. XSS + CSRF → state change. Self-XSS + CSRF/login-CSRF → real XSS. See `../../references/chaining.md`.
 
 ## Real paid example
-Stored XSS in a CRM "company name" field rendered unencoded in the internal agent dashboard. Blind payload fired in a support rep's session, exfil'd their session cookie to a collector — agent ATO with access to all customer tickets. Band: **$3k–$10k** (stored, blind, privileged victim).
+Real disclosed reports:
+- **Bypass for #488147 enables stored XSS on https://paypal.com/signin again** (PayPal, $20,000) — hackerone.com/reports/510152 — re-broke a patched stored XSS on the login page; login-origin persistence is what pays.
+- **Stored XSS on https://paypal.com/signin via cache poisoning** (PayPal, $18,900) — hackerone.com/reports/488147 — cache-poisoned an unkeyed input into stored script on the signin page.
+- **XSS in steam react chat client** (Valve, $7,500) — hackerone.com/reports/409850 — untrusted content executing in the React-rendered chat client.
+- **Reflected XSS in OAUTH2 login flow** (LY Corporation, $1,989) — hackerone.com/reports/697099 — reflected sink inside the OAuth login flow, close to session material.
+
+**The recurring tell:** the top payouts put script execution on an authenticated, session-bearing origin — login/OAuth pages and persistent sinks — not `alert(1)` on a marketing page.
 
 ## Rejected variants
 - Self-XSS requiring the victim to paste a payload into their own console/field, with no delivery vector.

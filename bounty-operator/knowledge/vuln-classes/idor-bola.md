@@ -42,7 +42,13 @@ B's **actual data returned in A's session** (or B's object mutated by A) — a f
 Read IDOR → enumerate → mass PII. Read → leak a token/reset link → **ATO**. Write IDOR → change victim email/role → **ATO / priv-esc**. BFLA on billing → financial impact. See `../../references/chaining.md`.
 
 ## Real paid example
-SaaS invoicing app: `GET /api/v2/invoices/{uuid}` returned the invoice for any workspace when the uuid was harvested from the shared-link `og:image` URL. Cross-tenant financial PII (customer names, amounts, addresses). Two test workspaces proved it. Band: **$2k–$8k** (cross-tenant, sensitive data).
+Real disclosed reports:
+- **IDOR to add secondary users in www.paypal.com/businessmanage/users/api/v1/users** (PayPal, $10,500) — hackerone.com/reports/415081 — the user-management API trusted a client-supplied account id, letting an attacker add secondary users to any business account (write BFLA, not just read).
+- **An IDOR that can lead to enumeration of a user and disclosure of email and phone number within cashier** (Unikrn, $3,000) — hackerone.com/reports/1966006 — a cashier object id enumerated real users and leaked email + phone; sensitive PII returned in the attacker's session.
+- **idor allows you to delete photos and album from a gallery** (Pornhub, $1,500) — hackerone.com/reports/380410 — a delete endpoint keyed on a guessable photo/album id with no ownership check — destructive write IDOR.
+- **[Razer Pay Mobile App] Broken Access Control Allowing Other User's Bank Account Deletion** (Razer, $1,000) — hackerone.com/reports/757095 — a mobile-API id let one user delete another's bank account; classic BOLA on a mutating call.
+
+**The recurring tell:** every one authenticates the session but never re-checks that the id in the path/body belongs to the caller — and the biggest payouts are on the *write/delete* variant (add user, delete account, delete album), not read.
 
 ## Rejected variants
 - Reflecting your *own* id back (reading your own data).

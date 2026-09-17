@@ -42,7 +42,13 @@ See `../payloads/ssti.md` and `../payloads/command-injection.md`.
 SSTI → RCE → full server compromise → infra/data. Blind SSTI → OOB → internal recon → SSRF. See `../../references/chaining.md`.
 
 ## Real paid example
-A "custom email footer" field in a marketing platform was rendered through Jinja2 server-side. `{{7*7}}`→`49` confirmed; `{{config}}` leaked the Flask secret key and SMTP creds; a controlled `curl` OOB callback proved RCE. Stopped at proof. Band: **$5k–$20k** (RCE).
+Real disclosed reports:
+- **[Ruby]: Server Side Template Injection** (GitHub Security Lab, $2,300) — hackerone.com/reports/1928279 — SSTI in a Ruby/ERB context reaching the object model.
+- **Path traversal, SSTI and RCE on a MailRu acquisition** (Mail.ru, $2,000) — hackerone.com/reports/536130 — SSTI chained with path traversal into full RCE.
+- **Server Side Template Injection in Return Magic email templates?** (Shopify, bounty undisclosed) — hackerone.com/reports/423541 — the classic email-template field rendered as a template, not data.
+- **Urgent: Server side template injection via Smarty template allows for RCE** (Unikrn, bounty undisclosed) — hackerone.com/reports/164224 — Smarty template field evaluated server-side, escalated to RCE.
+
+**The recurring tell:** the sink is a user-customizable template field (email templates especially), and value comes from proving server-side *evaluation* then walking the engine object model to RCE — reflected `{{7*7}}` alone is not it.
 
 ## Rejected variants
 - `{{7*7}}` reflected literally (no evaluation) — that's reflected XSS at most.

@@ -41,7 +41,13 @@ See `../payloads/lfi.md` and `../payloads/path-traversal.md` for retrieval/trave
 Upload → webshell → RCE → infra. SVG → stored XSS → ATO. XML upload → XXE → SSRF → cloud creds. Traversal write → overwrite config → auth bypass. See `../../references/chaining.md`.
 
 ## Real paid example
-Avatar upload allow-listed by `Content-Type` only; a `.phtml` polyglot with a JPEG magic header and `image/jpeg` header landed under a web-served, PHP-enabled uploads dir. Requesting it executed `id`. RCE on the app host. Band: **$5k–$20k** (RCE).
+Real disclosed reports:
+- **Unrestricted file upload on [ambassador.mail.ru]** (Mail.ru, $3000) — hackerone.com/reports/854032 — no real server-side type validation on the upload.
+- **External SSRF and Local File Read via video upload due to vulnerable FFmpeg HLS processing** (TikTok, $2727) — hackerone.com/reports/1062888 — uploaded media parsed by FFmpeg fetched/read files (parser-side SSRF/LFR).
+- **Webshell via File Upload on ecjobs.starbucks.com.cn** (Starbucks, bounty undisclosed) — hackerone.com/reports/506646 — an uploaded webshell landed in an executable path.
+- **[ RCE ] Through stopping the redirect in /admin/* the attacker able to bypass Authentication And Upload Malicious File** (Mail.ru, bounty undisclosed) — hackerone.com/reports/683957 — auth bypass then malicious file upload to RCE.
+
+**The recurring tell:** the server validates the wrong thing (client-side, Content-Type, extension) or hands the file to a parser — either the file lands in a web-executed path as a shell, or the parser (FFmpeg, image lib) fetches/reads on your behalf.
 
 ## Rejected variants
 - `.php` uploaded but stored where it's never executed (served as download/text).

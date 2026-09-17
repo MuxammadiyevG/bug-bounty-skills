@@ -54,10 +54,13 @@ or password-reset weakness to remove the first-factor dependency entirely. See
 `../../references/chaining.md`.
 
 ## Real paid example
-After correct password, the MFA verify endpoint returned `{"verified":false}` and the SPA gated on it.
-Intercepting and flipping it to `true` upgraded the session to fully authenticated — the server never
-re-checked the factor when serving account data. Response-manipulation MFA bypass, proven by loading
-the protected dashboard. Rough band: $3k–$10k (ATO-tier with a known password).
+Real disclosed reports:
+- **Hacker can bypass 2FA requirement and reporter blacklist through embedded submission form** (HackerOne, $10,000) — hackerone.com/reports/418767 — an alternate embedded-form path never enforced the 2FA requirement the main flow did (pattern 7, flow-swap).
+- **TikTok 2FA Bypass** (TikTok, $1,564) — hackerone.com/reports/1247108 — the second factor was enforceable on one path but skippable on another reaching the same authenticated state.
+- **2FA bypass by sending blank code** (Glassdoor, bounty undisclosed) — hackerone.com/reports/897385 — the verify endpoint accepted an empty code as valid; server never actually checked the OTP (pattern 1/3).
+- **Previously created sessions continue being valid after MFA activation** (Superhuman, bounty undisclosed) — hackerone.com/reports/667739 — turning on MFA didn't invalidate already-issued sessions, so a pre-existing session stayed fully authenticated without ever presenting a factor (pattern 5).
+
+**The recurring tell:** MFA is enforced in exactly one code path — flip to an alternate endpoint, an embedded form, a stale session, or a blank/unchecked code and the second factor is never actually verified server-side.
 
 ## Rejected variants
 - Flipping the response flip is cosmetic — the server still blocks protected resources. Not a bypass.

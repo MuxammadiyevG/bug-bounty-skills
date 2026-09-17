@@ -49,11 +49,13 @@ or CORS allowlist → token theft; → serve phishing/malware under a trusted br
 email spoofing. Severity is set by what trusts the subdomain. See `../../references/chaining.md`.
 
 ## Real paid example
-`status.target.tld` had a CNAME to a deleted status-page provider account showing the provider's
-"page not found — claim this" fingerprint. Registering the same slug let a unique marker file be
-served at the subdomain. Because session cookies were scoped to `.target.tld`, the takeover chained to
-cross-subdomain cookie theft. Claim removed after proof. Rough band: $2k–$10k (higher with the cookie
-chain).
+Real disclosed reports:
+- **Subdomain Takeover Via Insecure CloudFront Distribution cdn.grab.com** (Grab, $1,000) — hackerone.com/reports/352869 — dangling CloudFront distribution reclaimed.
+- **Subdomain takeover of storybook.lystit.com** (Lyst, $1,000) — hackerone.com/reports/779442 — CNAME to a deprovisioned hosting slot, re-registered.
+- **Authentication bypass on auth.uber.com via subdomain takeover of saostatic.uber.com** (Uber, bounty undisclosed) — hackerone.com/reports/219205 — takeover of a trusted host chained into an auth bypass.
+- **Subdomain Takeover to Authentication bypass** (Roblox, bounty undisclosed) — hackerone.com/reports/335330 — controlling the subdomain broke an auth flow that trusted it.
+
+**The recurring tell:** the bug is a dangling DNS record to a deprovisioned provider resource — but the payout is set by what trusts that subdomain. On its own it's low; chained to cookie scope, an OAuth callback, or an SSO/auth host it becomes an authentication bypass.
 
 ## Rejected variants
 - Dangling CNAME with no unclaimed fingerprint / resource not registerable — not exploitable.

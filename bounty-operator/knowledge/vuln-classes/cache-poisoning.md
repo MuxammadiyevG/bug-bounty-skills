@@ -53,10 +53,13 @@ with **HTTP smuggling** to poison keys you can't reach directly. Deception → s
 See `../../references/chaining.md`.
 
 ## Real paid example
-An app reflected `X-Forwarded-Host` into a `<script src>` for its JS bundle. Poisoning the homepage
-cache pointed every visitor's script tag at an attacker host; proven with a cache buster serving the
-swapped bundle back on a clean request, no real users hit. Stored XSS, mass 0-click. Rough band:
-$6k–$20k.
+Real disclosed reports:
+- **DoS on PayPal via web cache poisoning** (PayPal, $9,700) — hackerone.com/reports/622122 — unkeyed input poisoned the cache to serve a broken response to everyone (weaponized as DoS).
+- **Host header web cache poisoning lead to DoS** (Shopify, $2,900) — hackerone.com/reports/1096609 — unkeyed Host header changed the cached body, denying the page to all later visitors.
+- **Defacement of catalog.data.gov via web cache poisoning to stored DOMXSS** (GSA Bounty, $750) — hackerone.com/reports/303730 — poisoned an input into cached DOM XSS, mass 0-click.
+- **Web cache poisoning attack leads to user information and more** (Postmates, $500) — hackerone.com/reports/492841 — unkeyed input surfaced other users' info from cache.
+
+**The recurring tell:** an input that influences the response but is absent from the cache key (Host / X-Forwarded-Host / a fat param); impact ranges from mass DoS to stored XSS served from cache — always proven with a cache buster, never on real users.
 
 ## Rejected variants
 - Header reflected but response is `Cache-Control: no-store` / never a HIT — reflection only.

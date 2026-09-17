@@ -42,7 +42,13 @@ See `../payloads/sqli.md`; NoSQL variants in `../payloads/nosqli.md`.
 SQLi → creds/hashes → ATO/admin. SQLi → `xp_cmdshell` → RCE. SQLi read of session table → session hijack. SQLi → SSRF/file-read via DB functions. See `../../references/chaining.md`.
 
 ## Real paid example
-`ORDER BY` param on an admin reporting export was concatenated (unbindable position, ORM couldn't parameterize). Boolean+time blind confirmed on Postgres; extracted `version()` and `current_user` only. Read-path to password hashes demonstrated conceptually, not dumped. Band: **$4k–$12k**.
+Real disclosed reports:
+- **SQL Injection in report_xml.php through countryFilter[] parameter** (Valve, $25,000) — hackerone.com/reports/383127 — injection through an array/report filter param on a reporting endpoint.
+- **Time-Based SQL injection at city-mobil.ru** (Mail.ru, $15,000) — hackerone.com/reports/868436 — blind, confirmed purely by time differential.
+- **SQL injection at fleet.city-mobil.ru** (Mail.ru, $10,000) — hackerone.com/reports/881901 — injectable param on a secondary/fleet app surface.
+- **SQL injection on contactws.contact-sys.com in TScenObject action ScenObjects leads to remote code execution** (QIWI, bounty undisclosed) — hackerone.com/reports/816254 — SQLi escalated to RCE via DB primitives.
+
+**The recurring tell:** biggest payouts come from filter/report/sort params and legacy secondary apps, proven by boolean/time differential; escalation to RCE (QIWI) or a full DB read multiplies the reward.
 
 ## Rejected variants
 - A 500/stack trace with no confirmed injection (that's an error-disclosure at best).

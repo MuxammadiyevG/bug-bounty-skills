@@ -49,10 +49,13 @@ capture victim session/CSRF tokens → ATO. Desync → bypass front-end auth/WAF
 routes. See `../../references/chaining.md`.
 
 ## Real paid example
-A CDN-fronted app allowed HTTP/2. An H2.CL desync smuggled a request whose prefix was captured on the
-tester's *own* subsequent request, demonstrating that the next connection user's request line and
-headers would be prepended to an attacker path — request capture proven with a self-canary, no real
-users touched. Rough band: $10k–$30k.
+Real disclosed reports:
+- **HTTP Request Smuggling via HTTP/2** (Basecamp, $7,500) — hackerone.com/reports/1211724 — an h2 front-end downgrades and the origin trusts a smuggled length.
+- **HTTP request smuggling (?) canpol.deti.mail.ru** (Mail.ru, $5,000) — hackerone.com/reports/957881 — front-end/origin length disagreement confirmed via self-poison.
+- **Password theft login.newrelic.com via Request Smuggling** (New Relic, $3,000) — hackerone.com/reports/498052 — desync captures credentials off the shared connection.
+- **Mass account takeovers using HTTP Request Smuggling on https://slackb.com/ to steal session cookies** (Slack, bounty undisclosed) — hackerone.com/reports/737140 — desync harvests other users' session cookies at scale.
+
+**The recurring tell:** a CDN/proxy and the origin disagree on where a request ends, so smuggled bytes prepend onto the next connection user's request — the payout tracks straight to captured sessions/credentials and mass 0-click ATO.
 
 ## Rejected variants
 - A hung request with no reproducible self-poison — timing noise, not a desync.

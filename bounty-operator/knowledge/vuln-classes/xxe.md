@@ -40,7 +40,13 @@ See `../payloads/xxe.md`; for file-read targets `../payloads/lfi.md`, `../payloa
 XXE → SSRF → cloud metadata → creds → infra. XXE → source/config read → next bug. XXE file read of secrets → ATO/admin. See `../../references/chaining.md`.
 
 ## Real paid example
-A SOAP endpoint parsed request bodies with DTD processing on. `file:///etc/hostname` reflected in the response; pivoting the entity to `http://169.254.169.254/latest/meta-data/iam/` retrieved the instance role name (SSRF-via-XXE). Read one file + one metadata path, then stopped. Band: **$3k–$12k** (file read + SSRF to metadata).
+Real disclosed reports:
+- **XXE on pulse.mail.ru** (Mail.ru, $6,000) — hackerone.com/reports/505947 — external-entity processing on an XML intake endpoint.
+- **Multiple endpoints are vulnerable to XML External Entity injection (XXE)** (Pornhub, $2,500) — hackerone.com/reports/72272 — several XML endpoints parsing attacker DTDs.
+- **XXE at ecjobs.starbucks.com.cn/retail/hxpublic_v6/hxdynamicpage6.aspx** (Starbucks, bounty undisclosed) — hackerone.com/reports/500515 — DTD processing left on for an .aspx XML handler.
+- **XXE Injection through SVG image upload leads to SSRF** (Zivver, bounty undisclosed) — hackerone.com/reports/897244 — poisoned DTD inside an uploaded SVG, pivoted to SSRF.
+
+**The recurring tell:** any endpoint or file format that is XML underneath (SOAP, .aspx handlers, SVG uploads) with DTD/external-entity processing on; value is file read or SSRF pivot, not a parser error.
 
 ## Rejected variants
 - Parser error referencing DTD/entities with no file read or callback.

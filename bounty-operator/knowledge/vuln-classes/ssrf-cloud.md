@@ -53,10 +53,13 @@ SSRF → IMDS creds → cloud read = the canonical infra chain. Leaked key → c
 Bucket write → poison a served JS bundle → stored XSS/mass impact. See `../../references/chaining.md`.
 
 ## Real paid example
-A "generate PDF from URL" feature fetched arbitrary URLs server-side. Pointing it at IMDSv1 returned
-the instance role's temporary credentials in the rendered PDF; a single `get-caller-identity` call
-confirmed they were live, then testing stopped. SSRF → cloud credential exposure. Rough band:
-$8k–$25k.
+Real disclosed reports:
+- **Server Side Request Forgery (SSRF) at app.hellosign.com leads to AWS private keys disclosure** (Dropbox, $4913) — hackerone.com/reports/923132 — SSRF pivoted to AWS credential/key disclosure.
+- **Server-Side Request Forgery using Javascript allows to exfill data from Google Metadata** (Snapchat, bounty undisclosed) — hackerone.com/reports/530974 — reached the GCP metadata endpoint and exfiltrated it.
+- **SSRF leaking internal google cloud data through upload function [SSH Keys, etc..]** (Vimeo, bounty undisclosed) — hackerone.com/reports/549882 — an upload-fetch SSRF read GCP metadata including SSH keys.
+- **Full read SSRF in www.evernote.com that can leak aws metadata and local file inclusion** (Evernote, bounty undisclosed) — hackerone.com/reports/1189367 — full-response SSRF reaching AWS metadata plus LFI.
+
+**The recurring tell:** a server-side fetch (upload, PDF/preview, import) with no egress control pointed at the link-local metadata IP — the response carries role credentials or SSH keys straight back to you.
 
 ## Rejected variants
 - SSRF that only does DNS resolution / hits an OOB but reaches nothing internal and no metadata.

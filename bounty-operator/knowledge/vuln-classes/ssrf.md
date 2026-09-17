@@ -39,7 +39,13 @@ See `../payloads/ssrf.md` for wrappers and metadata paths.
 SSRF → metadata → temp cloud creds → cloud API read → **infra/data breach**. SSRF → internal admin action. XXE/file-upload → SSRF. See `../../references/chaining.md`.
 
 ## Real paid example
-Marketing tool "preview link" fetched arbitrary URLs server-side. Pointed at IMDSv2, retrieved the instance role's STS credentials, listed an S3 bucket of customer exports. Band: **$5k–$15k+** (cloud cred → data).
+Real disclosed reports:
+- **Server Side Request Forgery (SSRF) via Analytics Reports** (HackerOne, $25000) — hackerone.com/reports/2262382 — an analytics/report generator fetched an attacker-supplied URL with the server's network position.
+- **SSRF on project import via the remote_attachment_url on a Note** (GitLab, $10000) — hackerone.com/reports/826361 — an "import from URL" field on project import reached internal services.
+- **Blind SSRF to internal services in matrix preview_link API** (Reddit, $6000) — hackerone.com/reports/1960765 — a link-preview/unfurl endpoint, blind, confirmed via OOB to reach internal services.
+- **Server Side Request Forgery mitigation bypass** (GitLab, bounty undisclosed) — hackerone.com/reports/632101 — defeated an existing SSRF filter/allow-list.
+
+**The recurring tell:** a feature whose whole job is to fetch a URL you name — import-from-URL, link preview, report/analytics generator — with no egress allow-list, or a filter that re-resolves DNS after the check.
 
 ## Rejected variants
 - DNS-only pingback with no internal reach or read.

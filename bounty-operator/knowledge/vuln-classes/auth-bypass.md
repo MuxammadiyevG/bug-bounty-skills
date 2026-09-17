@@ -42,7 +42,13 @@ You **authenticate as / act as another account** you don't own the creds for, or
 Host poisoning → ATO. IDOR on `user_id` in reset → ATO. JWT `role` forge → vertical priv-esc → admin. Session fixation + open redirect → 0-click. See `../../references/chaining.md`.
 
 ## Real paid example
-Password-reset endpoint accepted `{"token":"...","email":"victim@..."}` where the token was validated but not bound to the email — a valid token from the attacker's own reset set any account's password. Full pre-conditions attacker-side; ATO on a controlled second account. Band: **$3k–$10k**.
+Real disclosed reports:
+- **Account Takeover via Password Reset without user interactions** (GitLab, $35,000) — hackerone.com/reports/2293343 — a reset flow reached full takeover with zero victim interaction; the token/flow wasn't bound to the account it claimed to reset.
+- **Account takeover via leaked session cookie** (HackerOne, $20,000) — hackerone.com/reports/745324 — a leaked session cookie was accepted as-is; the session wasn't tied to anything the attacker couldn't replay.
+- **Improper Authentication - any user can login as other user with otp/logout & otp/login** (Snapchat, bounty undisclosed) — hackerone.com/reports/921780 — the otp/login step trusted a prior step's identity, so logging out and back in logged you in *as someone else*.
+- **Bypass Password Authentication for updating email and phone number** (X / xAI, bounty undisclosed) — hackerone.com/reports/770504 — a sensitive change endpoint never re-verified the password it claimed to require, so the re-auth gate was skippable.
+
+**The recurring tell:** a later step trusts that an earlier step already proved identity (reset token not bound to the account, session cookie replayed, re-auth gate never re-checked) — each case is a step that should re-verify and doesn't, landing directly on ATO.
 
 ## Rejected variants
 - "Weak password policy" / "no rate limit" with no demonstrated takeover.

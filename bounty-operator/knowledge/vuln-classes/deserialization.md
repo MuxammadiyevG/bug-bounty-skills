@@ -49,9 +49,13 @@ LFI/upload → `phar://` → PHP POP RCE. Leaked secret (JS bundle) → forge si
 RCE → env/cloud creds → infra. See `../../references/chaining.md`.
 
 ## Real paid example
-An internal-looking API returned a base64 `rO0…` session token. A URLDNS gadget produced a DNS lookup
-from the app server, confirming blind Java deserialization; a CommonsCollections gadget then ran `id`
-out-of-band. RCE proven with a harmless command. Rough band: $10k–$30k.
+Real disclosed reports:
+- **RCE which may occur due to `ActiveSupport::MessageVerifier` or `ActiveSupport::MessageEncryptor` (especially Active storage)** (Ruby on Rails, $1500) — hackerone.com/reports/473888 — a signed/encrypted blob deserialized to objects once the secret was known.
+- **Java Deserialization RCE via JBoss JMXInvokerServlet/EJBInvokerServlet on card.starbucks.in** (Starbucks, bounty undisclosed) — hackerone.com/reports/153026 — a classic `ObjectInputStream` endpoint driven with a ysoserial gadget.
+- **Bundler's RCE with response using Marshal** (RubyGems, bounty undisclosed) — hackerone.com/reports/1119120 — Ruby `Marshal.load` on an attacker-controlled response.
+- **Remote Code Execution via Insecure Deserialization in Telerik UI (CVE-2019-18935)** (U.S. Dept Of Defense, bounty undisclosed) — hackerone.com/reports/1174185 — a known .NET deserialization CVE.
+
+**The recurring tell:** a serialized blob crossing a trust boundary — a Java `rO0` token, a Ruby Marshal string, a signed cookie whose secret leaked — deserialized into live objects that fire gadget chains at load time.
 
 ## Rejected variants
 - App accepts a serialized blob but uses a safe loader (`SafeLoader`, `JSON.parse`, allowlist) — no

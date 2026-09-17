@@ -41,7 +41,13 @@ Same discipline as the underlying class. IDOR-via-GraphQL → **another user's d
 Introspection → hidden mutation → IDOR/BFLA → cross-tenant data or priv-esc. Aliasing IDOR → mass PII. Argument injection → SQLi → DB. See `../../references/chaining.md`.
 
 ## Real paid example
-`user(id:)` resolver enforced auth only at the top level; the `organization { billingEmail }` nested field returned any org's billing contact regardless of membership. Aliased 50 org ids in one request to prove scale (stopped after 2). Cross-tenant PII. Band: **$2k–$8k**.
+Real disclosed reports:
+- **DOS via Mutation Aliasing in GraphQL Account Recovery Phone Number Verification API** (HackerOne, $12,500) — hackerone.com/reports/3287208 — one mutation aliased N times in a single request multiplies a rate-limited side effect.
+- **Unauthenticated RCE in Taskcluster web-server via GraphQL filter argument (sift $where)** (Mozilla, $12,000) — hackerone.com/reports/3782701 — a GraphQL argument flows unsanitized into a backend query operator → RCE.
+- **IDOR on GraphQL queries BillingDocumentDownload and BillDetails** (Shopify, $5,000) — hackerone.com/reports/2207248 — per-resolver authz gap exposes another account's billing docs.
+- **SSRF in graphQL query (pwapi.ex2b.com)** (EXNESS, $3,000) — hackerone.com/reports/1864188 — a query argument drives a server-side fetch.
+
+**The recurring tell:** authorization lives per-resolver (so one field forgets the check) and arguments flow straight into backend queries/fetches. Aliasing turns both authz gaps and rate limits into scale.
 
 ## Rejected variants
 - Introspection enabled, full stop — no sensitive query/mutation reached.

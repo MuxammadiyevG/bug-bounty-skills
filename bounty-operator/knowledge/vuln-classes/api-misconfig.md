@@ -52,9 +52,13 @@ Mass assignment `tenantId` → cross-tenant write. JWT forge → BFLA admin func
 pollution → RCE gadget or DOM XSS → ATO. CORS → session read → ATO. See `../../references/chaining.md`.
 
 ## Real paid example
-A profile-update PATCH accepted a `role` field never shown in the UI. Sending `"role":"admin"` on a
-free account promoted it; proven by then calling an admin-only export as that account. Mass assignment
-→ vertical privilege escalation. Rough band: $5k–$15k.
+Real disclosed reports:
+- **[Pre-Submission][H1-4420-2019] API access to Phabricator on code.uberinternal.com from leaked certificate in git repo** (Uber, $39,999) — hackerone.com/reports/591813 — a leaked client cert grants full internal API access.
+- **Exposed Kubernetes API - RCE/Exposed Creds** (Snapchat, $25,000) — hackerone.com/reports/455645 — an unauthenticated K8s API surface yields creds and RCE.
+- **Blind SSRF to internal services in matrix preview_link API** (Reddit, $6,000) — hackerone.com/reports/1960765 — an API param drives a server-side fetch to internal hosts.
+- **Denial of service to WP-JSON API by cache poisoning the CORS allow origin header** (Automattic, bounty undisclosed) — hackerone.com/reports/591302 — reflected CORS origin poisoned into cache.
+
+**The recurring tell:** the API works "correctly" — the bug is what it exposes or trusts. Unauthenticated/leaked-credential API surface pays the most; reflected origins and client-supplied params (SSRF, CORS) are the next tier.
 
 ## Rejected variants
 - CORS header reflected but `Allow-Credentials` is false and the data is public — no theft path.

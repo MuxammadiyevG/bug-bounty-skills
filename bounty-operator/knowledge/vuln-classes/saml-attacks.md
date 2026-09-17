@@ -53,11 +53,12 @@ access. Combine with an email-based `NameID` and a known target address to pick 
 `../../references/chaining.md`.
 
 ## Real paid example
-An SP validated the signature over the response but consumed a `NameID` containing an injected XML
-comment. `victim<!---->@attacker.tld` canonicalized to `victim@target.tld` for the signature check
-while the SP's parser returned `victim`, logging the attacker into the victim's account. Comment-
-injection auth bypass proven by reaching the victim's authorized second account. Rough band:
-$5k–$20k.
+Real disclosed reports:
+- **SAML Authentication Bypass on uchat.uberinternal.com** (Uber, $8,500) — hackerone.com/reports/223014 — improper SAML verification bypassed OneLogin to reach internal chat.
+- **SAML Signature verification bypass allows logging into any user (with specific conditions)** (GitHub, bounty undisclosed) — hackerone.com/reports/2579939 — ruby-saml parser differential (REXML vs Nokogiri) let a forged response log in as any user (CVE-2025-25291/25292).
+- **HackerOne SAML signup domain enforcement bypass results in unauthorized access to HackerOne PullRequest organization** (HackerOne, bounty undisclosed) — hackerone.com/reports/2101076 — domain-enforcement gap in SAML signup grants org access.
+
+**The recurring tell:** the SP verifies a signature over one thing but consumes another — the gap is a parser differential (two XML libraries disagree), a wrapping/injection, or a domain/claim enforcement miss. Payout tracks to a proven cross-user login, not "assertion accepted".
 
 ## Rejected variants
 - Assertion tampering rejected — signature actually verified over the consumed element. Not a bug.
