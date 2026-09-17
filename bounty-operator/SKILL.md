@@ -11,7 +11,9 @@ description: >
   before I report", "what severity is this", "how do I chain these", "write the report", scope
   checks, coverage tracking, and any authorized web / API / GraphQL / mobile / cloud / auth / IDOR
   / BOLA / SSRF / injection / business-logic testing — even when the user doesn't name a phase.
-  Routes per-class payload depth to specialist skills. Authorized targets only; enforces scope first.
+  Self-contained: carries per-class depth, payloads, bypass tables, and extended domains (web3,
+  mobile, reverse engineering, CI/CD, credential attack, malware, CTF) in-repo. Authorized targets
+  only; enforces scope first.
 ---
 
 # BOUNTY-OPERATOR — The Engagement Brain
@@ -19,7 +21,7 @@ description: >
 > The problem with an AI on a security target is rarely knowledge — it already knows what SQLi is.
 > The problem is **behavior**: it reports non-bugs, inflates severity, quits while surface remains,
 > drifts out of scope, drowns in scanner output, and repeats work. This skill encodes the
-> discipline and workflow that fix that, and routes per-class depth to specialist skills.
+> discipline and workflow that fix that, and carries per-class depth in-repo (`knowledge/`, `domains/`).
 
 On a live engagement: **no preamble.** Run the **Hunt Reflex**, then enter the **Operational Flow**
 at the right phase. State the one-line goal, write a visible plan, then work it.
@@ -89,12 +91,13 @@ has a failure mode — mapping forever and never testing. Each recon layer has d
 8. REPORT       → impact-first, anchored severity, copy-pasteable PoC (references/reporting.md)
 ```
 
-Per-class technique lives in **specialist skills** — route, don't improvise
-(`references/per-class-index.md`). Load the matching one the moment a class becomes the objective.
+Per-class technique lives in **`knowledge/vuln-classes/`** with payload arsenals in
+**`knowledge/payloads/`** — route, don't improvise (index: `references/per-class-index.md`). Open the
+matching file the moment a class becomes the objective; read-then-hunt, not hunt-then-guess.
 
-For **non-web scenarios** (APK teardown, binary RE, JS deobfuscation, firmware, CTF, malware,
-protocol analysis), route via `references/extended-scenarios.md` — it maps each scenario to the
-right toolchain and plugs findings back into phases 4–8 above.
+For **non-web scenarios** (mobile, web3/contract, credential attack, CI/CD, binary/firmware RE, JS
+deobfuscation, malware, CTF), route via `references/extended-scenarios.md` to the local **`domains/`**
+playbooks — each maps the scenario to its toolchain and plugs findings back into phases 4–8 above.
 
 For **automated scanning** (nuclei), use it as a *map*, not a hunter: technology-targeted templates
 after fingerprinting, manual verification of every hit, custom templates for repeated patterns.
@@ -229,9 +232,11 @@ You have limits a human hunter doesn't — protect them:
 
 ## What this skill is NOT
 
-The *engagement brain*, not a weapon cache. It ships **no payload arsenal and no ready-to-fire
-exploits** — it routes to per-class specialist skills for that depth. It refuses targets the operator
-isn't authorized to test and never fabricates findings to appear productive.
+The *engagement brain* first, with the arsenal attached — not a blind auto-exploiter. It carries
+payloads and per-class depth (`knowledge/`, `domains/`), but the brain governs their use: every
+payload rides a hypothesis, every finding meets its evidence bar, and severity stays honest. It fires
+**no exploit blindly**, never bulk-exfiltrates (prove with one record, then stop), refuses targets the
+operator isn't authorized to test, and never fabricates findings to appear productive.
 
 Language: understand operator instructions in any language and answer in theirs; keep payloads,
 code, and the report itself in English.

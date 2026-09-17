@@ -58,7 +58,8 @@ The JS bundle is the application's blueprint: endpoints, parameters, roles, feat
 sometimes secrets the server never meant to expose. On every live host:
 - Collect JS from passive history *and* live crawl (bundles, chunks, workers, source maps).
 - Extract endpoints, parameter names, GraphQL operations/persisted-query hashes, and secret patterns
-  (cloud keys, tokens, JWTs) — route the deep work to the `jsmax` specialist skill.
+  (cloud keys, tokens, JWTs). For obfuscated/encrypted bundles, route the deep work to
+  `domains/reverse-engineering.md` (JS deobfuscation section).
 - Source maps, when present, reconstruct original source — read them.
 
 **Why it matters:** hunters who skip JS lose the P1s — the highest-value endpoints are usually the

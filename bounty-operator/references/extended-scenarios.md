@@ -1,113 +1,56 @@
 # Extended Scenario Routing — beyond web apps
 
-> bounty-operator's core is web/API hunting, but modern engagements cross into APK teardown,
-> binary analysis, JS deobfuscation, firmware, CTF, and more. This file routes each scenario to
-> the right tool + methodology so the agent stops guessing commands.
+> bounty-operator's core is web/API hunting, but modern engagements cross into APK teardown, binary
+> analysis, JS deobfuscation, firmware, CTF, web3, credential attack, and CI/CD. Each scenario has a
+> **local domain playbook** in `domains/`. Load the matching one; it carries the toolchain, workflow,
+> evidence bar, and how results plug back into the Operational Flow. Nothing here needs an external skill.
 
-## Routing table — scenario → toolchain → methodology
+## Routing table — scenario → local playbook
 
-When a task hits one of these scenarios, load the matching toolchain and follow the workflow.
-If `reverse-skill` (github.com/zhaoxuya520/reverse-skill) is installed alongside, defer to its
-deep per-scenario playbooks. Otherwise, follow the condensed guidance below.
+| Signal / scenario | Open this file |
+|---|---|
+| `.apk` / `.ipa`, Android/iOS app, mobile API, SSL-pinned traffic | `domains/mobile.md` |
+| Solidity/Rust contract, DeFi/TVL target, token / meme-coin rug check | `domains/web3-audit.md` |
+| Login portal + employee list, O365/Okta, "should I spray?" | `domains/credential-attack.md` |
+| Public repo, GitHub Actions / GitLab CI / Jenkins, workflow files | `domains/cicd-security.md` |
+| `.exe`/`.dll`/`.so`/`.elf` binary, firmware `.bin`, .NET assembly, obfuscated JS, encrypted params | `domains/reverse-engineering.md` |
+| Suspicious binary, malware sample, YARA/triage (defensive) | `domains/malware-analysis.md` |
+| CTF challenge, flag format, category-based solve | `domains/ctf.md` |
 
-### Mobile / APK
+Each domain file is self-contained: **when to load → toolchain → workflow → evidence bar → feed back
+into phases 4-8 → pitfalls.** Read the file before running commands — stop guessing tool invocations.
 
-| Signal | Toolchain | Workflow |
-|---|---|---|
-| `.apk`, Android app, mobile API | jadx, apktool, Frida, objection, MobSF | Decompile → manifest perms → exported components → hardcoded secrets → API surface → cert pinning bypass → dynamic hook → test API auth from extracted endpoints |
+## The one insight that unifies the non-web domains
 
-**Key insight:** a mobile app is a *shipped copy of the backend contract*. Decompile it for
-endpoints, secrets, hidden params, and request-signing logic the web UI never exposes. Feed every
-extracted endpoint and secret back into the web/API hunt (phase 5 of the Operational Flow).
-
-Extract checklist: API base URLs, auth tokens/keys, GraphQL operations, hidden admin endpoints,
-certificate pins, request-signing algorithms, feature flags, debug/staging hostnames.
-
-### iOS / mobile (non-APK)
-
-| Signal | Toolchain | Workflow |
-|---|---|---|
-| `.ipa`, iOS app, Swift/ObjC binary | class-dump, Hopper/IDA, Frida, objection, SSL Kill Switch | Decrypt (if needed) → class-dump headers → find URL schemes → extract plists for secrets → Frida hook network calls → extract API surface |
-
-### Binary reverse engineering
-
-| Signal | Toolchain | Workflow |
-|---|---|---|
-| `.exe`, `.dll`, `.so`, `.elf`, PE/ELF, "reverse this binary" | IDA Pro, Ghidra, radare2, Binary Ninja | Load → identify compiler/packer → strings → imports/exports → find main/entry → trace interesting functions → decompile critical paths → document findings |
-
-Decision tree for tool selection:
-- **IDA Pro** — gold standard for complex binaries, best decompiler for x86/x64/ARM
-- **Ghidra** — free, excellent for team work, good decompiler, extensible
-- **radare2/rizin** — CLI-first, scriptable, good for automation and quick triage
-- **Binary Ninja** — strong HLIL/MLIL, good for automated analysis pipelines
-
-### .NET / C# reverse engineering
-
-| Signal | Toolchain | Workflow |
-|---|---|---|
-| `.dll` (managed), `.exe` (.NET), C# app | dnSpy, ILSpy, de4dot (deobfuscation) | Deobfuscate (de4dot) → decompile (dnSpy/ILSpy) → find auth/crypto logic → extract keys/endpoints → identify serialization (BinaryFormatter → deser vuln) |
-
-### Frontend JS / encrypted params
-
-| Signal | Toolchain | Workflow |
-|---|---|---|
-| Encrypted/signed request params, JS bundles, webpack, obfuscated JS | Browser devtools, AST tools, de4js, synchrony, webpack-unpack | Identify encryption function → trace key material → find the signing/encryption entry point → reconstruct the algorithm → replay requests with modified params |
-
-**Why it matters for bug bounty:** if the app encrypts request bodies or signs params client-side,
-reversing that logic lets you modify parameters the app "protects" (price, role, userId) and test
-for business-logic and authz bugs the WAF can't see.
-
-### Firmware / IoT
-
-| Signal | Toolchain | Workflow |
-|---|---|---|
-| `.bin` firmware, IoT device, embedded | binwalk, firmware-mod-kit, EMBA, Firmwalker | Extract filesystem (binwalk) → find web server config → extract hardcoded creds → find debug interfaces (UART/JTAG) → analyze update mechanism → find command injection in CGI/API |
-
-### CTF challenges
-
-| Signal | Toolchain | Workflow |
-|---|---|---|
-| "CTF", challenge file, flag format | Per-category (pwn/rev/web/crypto/forensics) | Identify category → select toolchain → systematic solve → document solution |
-
-If `reverse-skill`'s CTF-Sandbox-Orchestrator (42 sub-skills) is installed, route there for
-category-specific deep playbooks.
-
-### Malware analysis
-
-| Signal | Toolchain | Workflow |
-|---|---|---|
-| Suspicious binary, malware sample, YARA | IDA/Ghidra, YARA, sandbox (ANY.RUN/VirusTotal), Process Monitor, Wireshark | **Static first:** strings, imports, PE headers, packer detection → **Dynamic:** sandbox execution, network capture, API monitoring → **Behavioral:** C2 communication, persistence, evasion techniques |
-
-**Authorized use only.** Analyze in an isolated environment; never execute on production systems.
-
-### Network capture / protocol analysis
-
-| Signal | Toolchain | Workflow |
-|---|---|---|
-| `.pcap`, network traffic, protocol RE | Wireshark, tshark, mitmproxy, Reqable | Load capture → protocol hierarchy → filter by host/port → extract credentials/tokens → reconstruct sessions → identify vulnerable protocols |
-
----
+A shipped client (mobile app, desktop binary, firmware, obfuscated JS) is a **copy of the backend
+contract**. Reverse it for endpoints, secrets, hidden params, and request-signing/encryption logic
+the web UI never exposes — then feed every extracted endpoint and secret straight back into the
+web/API hunt (phase 5 of the Operational Flow). The highest-value endpoints are usually the ones the
+UI never links to.
 
 ## Integration with the Operational Flow
 
-These scenarios plug into the main bounty-operator workflow:
-
 - **Phase 2–3 (recon):** APK teardown and JS deobfuscation feed new endpoints into the surface map.
-- **Phase 4 (model):** Binary/firmware analysis reveals auth schemes, crypto, and trust assumptions.
-- **Phase 5 (hunt):** Reversed request-signing lets you modify "protected" params for authz testing.
-- **Phase 6–8 (validate/chain/report):** Same gates apply — the 7-Question Gate doesn't care how
+- **Phase 4 (model):** binary/firmware/contract analysis reveals auth schemes, crypto, trust assumptions.
+- **Phase 5 (hunt):** reversed request-signing lets you modify "protected" params (price, role, userId)
+  for authz/business-logic testing the WAF can't see.
+- **Phase 6–8 (validate/chain/report):** the same gates apply — the 7-Question Gate doesn't care how
   you found it; it cares whether it's real, in scope, and impactful.
+
+## Optional external deep-dive
+
+If `reverse-skill` (github.com/zhaoxuya520/reverse-skill) or other specialist skills are installed
+alongside, the domain files note where to defer to them for even deeper per-scenario playbooks. They
+are optional — the `domains/` files stand on their own.
 
 ## Tool availability check
 
-Before starting any scenario, verify the required tools are installed. If `reverse-skill` is
-present, run its `refresh-tool-index` script. Otherwise, check manually:
+Before starting any scenario, verify the required tools are installed. Missing tools are *skipped, not
+errors* — adapt the workflow to what's available.
 
 ```bash
-# Quick check for common tools
-for tool in jadx apktool frida objection nuclei; do
+# Quick check for common tools (edit the list per domain)
+for tool in jadx apktool frida objection nuclei binwalk slither; do
   command -v "$tool" >/dev/null 2>&1 && echo "OK: $tool" || echo "MISSING: $tool"
 done
 ```
-
-Missing tools are *skipped, not errors* — adapt the workflow to what's available.
